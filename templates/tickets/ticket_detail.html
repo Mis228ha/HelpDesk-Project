@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ticket.title }} — Helpdesk{% endblock %}
+
+{% block content %}
+    <a href="{% url 'tickets:ticket_list' %}" class="back-link">&laquo; Ко всем заявкам</a>
+
+    <div class="card">
+        <div class="card-header">
+            <h1>{{ ticket.title }}</h1>
+            <span class="badge badge-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+        </div>
+
+        <dl class="meta-list">
+            <dt>Приоритет</dt>
+            <dd><span class="badge badge-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span></dd>
+
+            <dt>Автор</dt>
+            <dd>{{ ticket.author.username }}</dd>
+
+            <dt>Создана</dt>
+            <dd>{{ ticket.created_at|date:"d.m.Y H:i" }}</dd>
+
+            <dt>Обновлена</dt>
+            <dd>{{ ticket.updated_at|date:"d.m.Y H:i" }}</dd>
+        </dl>
+
+        <div class="ticket-description">
+            <h2>Описание</h2>
+            <p>{{ ticket.description|linebreaks }}</p>
+        </div>
+    </div>
+{% endblock %}

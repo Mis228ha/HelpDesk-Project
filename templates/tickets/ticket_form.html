@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Новая заявка — Helpdesk{% endblock %}
+
+{% block content %}
+    <div class="card form-card">
+        <h1>Новая заявка</h1>
+        {% crispy form %}
+    </div>
+{% endblock %}

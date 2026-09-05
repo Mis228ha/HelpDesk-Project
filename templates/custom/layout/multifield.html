@@ -1,0 +1,4 @@
+<div{% if multifield.css_id %} id="{{ multifield.css_id }}"{% endif %} class="form-group{% if multifield.css_class %} {{ multifield.css_class }}{% endif %}">
+    {% if label %}<label>{{ label|safe }}</label>{% endif %}
+    {{ fields|safe }}
+</div>

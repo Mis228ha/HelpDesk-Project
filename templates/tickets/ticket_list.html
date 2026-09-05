@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Мои заявки — Helpdesk{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>Мои заявки</h1>
+        <a href="{% url 'tickets:ticket_create' %}" class="btn btn-primary">+ Новая заявка</a>
+    </div>
+
+    {% if tickets %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Заголовок</th>
+                    <th>Статус</th>
+                    <th>Приоритет</th>
+                    <th>Создана</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in tickets %}
+                    <tr>
+                        <td><a href="{% url 'tickets:ticket_detail' ticket.pk %}">{{ ticket.title }}</a></td>
+                        <td><span class="badge badge-{{ ticket.status }}">{{ ticket.get_status_display }}</span></td>
+                        <td><span class="badge badge-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span></td>
+                        <td>{{ ticket.created_at|date:"d.m.Y H:i" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if is_paginated %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}">&laquo; Назад</a>
+                {% endif %}
+                <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">Вперёд &raquo;</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="card empty-state">
+            <p>У вас пока нет заявок.</p>
+            <a href="{% url 'tickets:ticket_create' %}" class="btn btn-primary">Создать первую заявку</a>
+        </div>
+    {% endif %}
+{% endblock %}

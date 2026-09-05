@@ -1,0 +1,62 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- Виртуальное окружение ---
+venv/
+env/
+ENV/
+.venv/
+
+# --- Django ---
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# --- Переменные окружения / секреты ---
+.env
+.env.*
+!.env.example
+
+# --- Тесты и покрытие ---
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.pytest_cache/
+
+# --- IDE / редакторы ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- ОС ---
+.DS_Store
+Thumbs.db

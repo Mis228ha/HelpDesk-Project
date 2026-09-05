@@ -1,0 +1,495 @@
+/* =========================================================
+   Helpdesk Project — базовые стили
+   Чистый CSS, без фреймворков.
+   ========================================================= */
+
+/* ---------- 1. Сброс отступов ---------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+img,
+picture,
+svg {
+    display: block;
+    max-width: 100%;
+}
+
+ul,
+ol {
+    list-style: none;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+input,
+textarea,
+select {
+    font: inherit;
+    color: inherit;
+}
+
+
+/* ---------- 2. Цветовая схема ---------- */
+:root {
+    --color-bg: #f4f6f8;
+    --color-surface: #ffffff;
+    --color-border: #dde2e7;
+    --color-text: #202730;
+    --color-text-muted: #626c77;
+
+    --color-primary: #2f6fed;
+    --color-primary-dark: #1e54c4;
+    --color-primary-contrast: #ffffff;
+
+    --color-danger: #d64545;
+    --color-success: #2f9e57;
+    --color-warning: #d9932c;
+
+    --radius: 6px;
+    --shadow-sm: 0 1px 2px rgba(20, 25, 32, 0.06);
+    --shadow-md: 0 2px 8px rgba(20, 25, 32, 0.08);
+}
+
+
+/* ---------- 3. Типографика ---------- */
+body {
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+h1, h2, h3, h4 {
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-text);
+    margin-bottom: 0.6em;
+}
+
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.35rem; }
+h3 { font-size: 1.1rem; }
+
+p {
+    margin-bottom: 1em;
+}
+
+.container {
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+}
+
+
+/* ---------- 4. Header / Nav ---------- */
+.site-header {
+    background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+}
+
+.logo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.main-nav ul {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.main-nav a {
+    color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+.main-nav a:hover {
+    color: var(--color-primary);
+}
+
+.nav-user {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.logout-form {
+    display: inline;
+}
+
+.link-button {
+    color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+.link-button:hover {
+    color: var(--color-danger);
+}
+
+
+/* ---------- 5. Content ---------- */
+.site-content {
+    flex: 1;
+    padding: 2rem 0;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: var(--color-text-muted);
+}
+
+.back-link:hover {
+    color: var(--color-primary);
+}
+
+
+/* ---------- 6. Footer ---------- */
+.site-footer {
+    background-color: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    padding: 1.25rem 0;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+}
+
+
+/* ---------- 7. Кнопки ---------- */
+.btn {
+    display: inline-block;
+    padding: 0.55rem 1.1rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: 1px solid transparent;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: var(--color-primary-contrast);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primary-dark);
+}
+
+.btn-secondary {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border-color: var(--color-border);
+}
+
+.btn-secondary:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+
+/* ---------- 8. Карточки ---------- */
+.card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-card {
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.form-footer {
+    margin-top: 1rem;
+    text-align: center;
+    color: var(--color-text-muted);
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--color-text-muted);
+}
+
+.empty-state .btn {
+    margin-top: 0.75rem;
+}
+
+.meta-list {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.4rem 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.meta-list dt {
+    color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+.ticket-description h2 {
+    margin-top: 1rem;
+}
+
+
+/* ---------- 9. Таблицы ---------- */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.table th,
+.table td {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.table th {
+    background-color: var(--color-bg);
+    font-weight: 600;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background-color: var(--color-bg);
+}
+
+
+/* ---------- 10. Значки статусов/приоритетов ---------- */
+.badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background-color: var(--color-border);
+    color: var(--color-text);
+}
+
+.badge-open { background-color: #e4edff; color: var(--color-primary-dark); }
+.badge-in_progress { background-color: #fdecd1; color: var(--color-warning); }
+.badge-closed { background-color: #e0f4e6; color: var(--color-success); }
+
+.badge-low { background-color: #e0f4e6; color: var(--color-success); }
+.badge-medium { background-color: #fdecd1; color: var(--color-warning); }
+.badge-high { background-color: #fbe1e1; color: var(--color-danger); }
+
+
+/* ---------- 11. Пагинация ---------- */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    color: var(--color-text-muted);
+}
+
+.pagination a {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+
+/* ---------- 12. Сообщения (messages framework) ---------- */
+.messages {
+    margin-bottom: 1.5rem;
+}
+
+.message {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--color-border);
+}
+
+.message-success { background-color: #e0f4e6; border-color: var(--color-success); color: var(--color-success); }
+.message-error { background-color: #fbe1e1; border-color: var(--color-danger); color: var(--color-danger); }
+.message-warning { background-color: #fdecd1; border-color: var(--color-warning); color: var(--color-warning); }
+.message-info { background-color: #e4edff; border-color: var(--color-primary); color: var(--color-primary-dark); }
+
+
+/* ---------- 13. Формы (дополняет crispy-шаблоны) ---------- */
+.form-group {
+    margin-bottom: 1.1rem;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background-color: var(--color-surface);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(47, 111, 237, 0.15);
+}
+
+.help-text {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-top: 0.25rem;
+}
+
+.error-list {
+    color: var(--color-danger);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    padding-left: 1.1rem;
+}
+
+.form-errors {
+    background-color: #fbe1e1;
+    border: 1px solid var(--color-danger);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.1rem;
+}
+
+.form-errors .error-list {
+    margin-top: 0.25rem;
+}
+
+.form-group.has-error input,
+.form-group.has-error textarea,
+.form-group.has-error select {
+    border-color: var(--color-danger);
+}
+
+.required-marker {
+    color: var(--color-danger);
+    margin-left: 0.15rem;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.1rem;
+}
+
+.form-check input[type="checkbox"],
+.form-check input[type="radio"] {
+    width: auto;
+}
+
+.form-check label {
+    margin-bottom: 0;
+    font-weight: 500;
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.form-column {
+    flex: 1;
+    min-width: 0;
+}
+
+
+/* ---------- 14. Адаптивность ---------- */
+@media (max-width: 600px) {
+    .header-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .main-nav ul {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
