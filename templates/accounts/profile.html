@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Мой профиль — Helpdesk{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <h1>Мой профиль</h1>
+        <dl class="meta-list">
+            <dt>Логин</dt>
+            <dd>{{ user.username }}</dd>
+
+            <dt>Email</dt>
+            <dd>{{ user.email|default:"—" }}</dd>
+
+            <dt>Роль</dt>
+            <dd>
+                {% if profile %}
+                    {{ profile.get_role_display }}
+                {% else %}
+                    Профиль не создан
+                {% endif %}
+            </dd>
+        </dl>
+    </div>
+{% endblock %}

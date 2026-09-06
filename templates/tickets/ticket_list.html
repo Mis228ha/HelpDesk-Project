@@ -1,34 +1,28 @@
 {% extends "base.html" %}
 
-{% block title %}Мои заявки — Helpdesk{% endblock %}
+{% block title %}{% if is_admin %}Все заявки{% else %}Мои заявки{% endif %} — Helpdesk{% endblock %}
 
 {% block content %}
     <div class="page-header">
-        <h1>Мои заявки</h1>
+        <h1>{% if is_admin %}Все заявки{% else %}Мои заявки{% endif %}</h1>
         <a href="{% url 'tickets:ticket_create' %}" class="btn btn-primary">+ Новая заявка</a>
     </div>
 
     {% if tickets %}
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Заголовок</th>
-                    <th>Статус</th>
-                    <th>Приоритет</th>
-                    <th>Создана</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for ticket in tickets %}
-                    <tr>
-                        <td><a href="{% url 'tickets:ticket_detail' ticket.pk %}">{{ ticket.title }}</a></td>
-                        <td><span class="badge badge-{{ ticket.status }}">{{ ticket.get_status_display }}</span></td>
-                        <td><span class="badge badge-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span></td>
-                        <td>{{ ticket.created_at|date:"d.m.Y H:i" }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="ticket-cards">
+            {% for ticket in tickets %}
+                <a href="{% url 'tickets:ticket_detail' ticket.pk %}" class="card ticket-card">
+                    <div class="ticket-card-header">
+                        <h2>{{ ticket.title }}</h2>
+                        <span class="badge badge-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+                    </div>
+                    <div class="ticket-card-meta">
+                        <span>{{ ticket.category.name }}</span>
+                        <span>{{ ticket.created_at|date:"d.m.Y H:i" }}</span>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
 
         {% if is_paginated %}
             <div class="pagination">
@@ -43,7 +37,7 @@
         {% endif %}
     {% else %}
         <div class="card empty-state">
-            <p>У вас пока нет заявок.</p>
+            <p>Заявок пока нет.</p>
             <a href="{% url 'tickets:ticket_create' %}" class="btn btn-primary">Создать первую заявку</a>
         </div>
     {% endif %}

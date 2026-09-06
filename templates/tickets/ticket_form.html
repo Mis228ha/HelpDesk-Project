@@ -6,6 +6,12 @@
 {% block content %}
     <div class="card form-card">
         <h1>Новая заявка</h1>
-        {% crispy form %}
+        <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Создать заявку</button>
+            </div>
+        </form>
     </div>
 {% endblock %}

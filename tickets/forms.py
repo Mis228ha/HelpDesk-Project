@@ -1,22 +1,42 @@
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit
 from django import forms
 
-from .models import Ticket
+from .models import Comment, Ticket
 
 
 class TicketForm(forms.ModelForm):
-    """Форма создания и редактирования заявки, оформленная через crispy-forms."""
+    """
+    Форма создания заявки: title, description, category.
+
+    author проставляется во view (request.user), status не входит в форму
+    и остаётся равным значению по умолчанию модели ("new").
+    Рендерится в шаблоне через фильтр {{ form|crispy }}.
+    """
 
     class Meta:
         model = Ticket
-        fields = ["title", "description", "category", "status"]
+        fields = ["title", "description", "category"]
         widgets = {
             "description": forms.Textarea(attrs={"rows": 6}),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_method = "post"
-        self.helper.add_input(Submit("submit", "Сохранить заявку"))
+
+class CommentForm(forms.ModelForm):
+    """Форма добавления комментария к заявке. ticket и author проставляются во view."""
+
+    class Meta:
+        model = Comment
+        fields = ["text"]
+        widgets = {
+            "text": forms.Textarea(attrs={"rows": 3, "placeholder": "Напишите комментарий..."}),
+        }
+        labels = {
+            "text": "Комментарий",
+        }
+
+
+class TicketStatusForm(forms.ModelForm):
+    """Форма смены статуса заявки — доступна только администратору (см. TicketStatusUpdateView)."""
+
+    class Meta:
+        model = Ticket
+        fields = ["status"]

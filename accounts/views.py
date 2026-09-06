@@ -1,16 +1,22 @@
 from django.contrib.auth import login
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.views.generic import CreateView, TemplateView
 
-from .forms import LoginForm, SignUpForm
+from .forms import RegisterForm
 
 
-class SignUpView(CreateView):
-    """Регистрация нового пользователя с автоматическим входом."""
+class RegisterView(CreateView):
+    """
+    Регистрация нового пользователя.
 
-    form_class = SignUpForm
-    template_name = "accounts/signup.html"
+    RegisterForm сама создаёт связанный Profile (роль «клиент»);
+    после успешной регистрации пользователь сразу авторизуется.
+    """
+
+    form_class = RegisterForm
+    template_name = "accounts/register.html"
     success_url = reverse_lazy("tickets:ticket_list")
 
     def form_valid(self, form):
@@ -20,12 +26,21 @@ class SignUpView(CreateView):
 
 
 class AccountLoginView(LoginView):
-    """Вход пользователя."""
+    """Вход пользователя (стандартная AuthenticationForm из django.contrib.auth)."""
 
-    authentication_form = LoginForm
     template_name = "accounts/login.html"
 
 
 class AccountLogoutView(LogoutView):
     """Выход пользователя."""
-    pass
+
+
+class ProfileView(LoginRequiredMixin, TemplateView):
+    """Простая страница профиля: только просмотр (username, email, роль)."""
+
+    template_name = "accounts/profile.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["profile"] = getattr(self.request.user, "profile", None)
+        return context
