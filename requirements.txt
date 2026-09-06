@@ -1,18 +1,18 @@
-# Django и его точная минорная версия (4.2 LTS)
+# Django and its pinned minor version (4.2 LTS)
 Django==4.2.*
 
-# ASGI-интерфейс (устанавливается автоматически вместе с Django,
-# зафиксирован явно для воспроизводимости сборки)
+# ASGI interface (installed automatically with Django,
+# pinned explicitly for reproducible builds)
 asgiref==3.12.1
 
-# SQL-парсер, используется Django ORM (зависимость Django)
+# SQL parser used by Django ORM (Django dependency)
 sqlparse==0.6.0
 
-# Формы: рендеринг форм без ручной вёрстки каждого поля
+# Forms: render forms without hand-coding every field's HTML
 django-crispy-forms==2.5
 
-# Настройки через .env (SECRET_KEY, DEBUG, DATABASE_URL и т.д.)
+# Settings via .env (SECRET_KEY, DEBUG, DATABASE_URL, etc.)
 django-environ==0.14.0
 
-# --- Понадобится позже, при переходе на PostgreSQL ---
+# --- Needed later, when switching to PostgreSQL ---
 # psycopg2-binary==2.9.9

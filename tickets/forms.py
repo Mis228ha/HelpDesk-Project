@@ -10,7 +10,7 @@ class TicketForm(forms.ModelForm):
 
     class Meta:
         model = Ticket
-        fields = ["title", "description", "priority", "status"]
+        fields = ["title", "description", "category", "status"]
         widgets = {
             "description": forms.Textarea(attrs={"rows": 6}),
         }
