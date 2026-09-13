@@ -70,14 +70,24 @@ class TicketFormValidationTests(TestCase):
 
     def test_title_is_required(self):
         form = TicketForm(
-            data={"title": "", "description": "Описание проблемы", "category": self.category.pk}
+            data={
+                "title": "",
+                "description": "Описание проблемы",
+                "category": self.category.pk,
+                "priority": Ticket.Priority.MEDIUM,
+            }
         )
         self.assertFalse(form.is_valid())
         self.assertIn("title", form.errors)
 
     def test_description_is_required(self):
         form = TicketForm(
-            data={"title": "Заголовок заявки", "description": "", "category": self.category.pk}
+            data={
+                "title": "Заголовок заявки",
+                "description": "",
+                "category": self.category.pk,
+                "priority": Ticket.Priority.MEDIUM,
+            }
         )
         self.assertFalse(form.is_valid())
         self.assertIn("description", form.errors)
@@ -88,6 +98,7 @@ class TicketFormValidationTests(TestCase):
                 "title": "Заголовок заявки",
                 "description": "Описание проблемы",
                 "category": self.category.pk,
+                "priority": Ticket.Priority.MEDIUM,
             }
         )
         self.assertTrue(form.is_valid())

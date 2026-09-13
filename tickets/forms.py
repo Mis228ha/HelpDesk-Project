@@ -5,7 +5,7 @@ from .models import Comment, Ticket
 
 class TicketForm(forms.ModelForm):
     """
-    Форма создания заявки: title, description, category.
+    Форма создания заявки: title, description, category, priority.
 
     author проставляется во view (request.user), status не входит в форму
     и остаётся равным значению по умолчанию модели ("new").
@@ -14,7 +14,7 @@ class TicketForm(forms.ModelForm):
 
     class Meta:
         model = Ticket
-        fields = ["title", "description", "category"]
+        fields = ["title", "description", "category", "priority"]
         widgets = {
             "description": forms.Textarea(attrs={"rows": 6}),
         }

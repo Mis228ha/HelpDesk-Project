@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.db import models
 
+from tickets.models import Department
+
 
 class Profile(models.Model):
     """Дополнительный профиль пользователя с ролью в системе поддержки."""
@@ -17,6 +19,14 @@ class Profile(models.Model):
     )
     role = models.CharField(
         "Роль", max_length=20, choices=Role.choices, default=Role.CLIENT
+    )
+    department = models.ForeignKey(
+        Department,
+        verbose_name="Отдел",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="profiles",
     )
 
     class Meta:

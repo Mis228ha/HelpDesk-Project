@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from accounts.models import Profile
-from tickets.models import Category, Ticket
+from tickets.models import Category, StatusHistory, Ticket
 
 User = get_user_model()
 
@@ -51,12 +51,14 @@ class TicketCreateViewTests(TicketViewTestBase):
                 "title": "Новая заявка",
                 "description": "Описание новой заявки",
                 "category": self.category.pk,
+                "priority": Ticket.Priority.HIGH,
             },
         )
 
         new_ticket = Ticket.objects.get(title="Новая заявка")
         self.assertEqual(new_ticket.author, self.client1_user)
         self.assertEqual(new_ticket.status, Ticket.Status.NEW)
+        self.assertEqual(new_ticket.priority, Ticket.Priority.HIGH)
         self.assertRedirects(response, new_ticket.get_absolute_url())
 
     def test_anonymous_user_redirected_to_login(self):
@@ -125,3 +127,27 @@ class TicketStatusUpdateViewTests(TicketViewTestBase):
         self.assertRedirects(
             response, reverse("tickets:ticket_detail", args=[self.ticket1.pk])
         )
+
+    def test_status_change_creates_history_entry(self):
+        self.client.login(username="admin", password="pass12345")
+        self.assertEqual(self.ticket1.status, Ticket.Status.NEW)
+
+        self.client.post(
+            reverse("tickets:ticket_status_update", args=[self.ticket1.pk]),
+            {"status": Ticket.Status.IN_PROGRESS},
+        )
+
+        entry = StatusHistory.objects.get(ticket=self.ticket1)
+        self.assertEqual(entry.old_status, Ticket.Status.NEW)
+        self.assertEqual(entry.new_status, Ticket.Status.IN_PROGRESS)
+        self.assertEqual(entry.changed_by, self.admin_user)
+
+    def test_submitting_same_status_does_not_create_history_entry(self):
+        self.client.login(username="admin", password="pass12345")
+
+        self.client.post(
+            reverse("tickets:ticket_status_update", args=[self.ticket1.pk]),
+            {"status": Ticket.Status.NEW},  # тот же статус, что уже стоит
+        )
+
+        self.assertFalse(StatusHistory.objects.filter(ticket=self.ticket1).exists())

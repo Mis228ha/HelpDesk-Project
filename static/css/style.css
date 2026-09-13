@@ -64,6 +64,7 @@ select {
     --color-danger: #d64545;
     --color-success: #2f9e57;
     --color-warning: #d9932c;
+    --color-priority-high: #e0672c;
 
     --radius: 6px;
     --shadow-sm: 0 1px 2px rgba(20, 25, 32, 0.06);
@@ -320,23 +321,27 @@ p {
 
 
 /* ---------- 10. Значки статусов/приоритетов ---------- */
-.badge {
-    display: inline-block;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    background-color: var(--color-border);
-    color: var(--color-text);
-}
-
-.badge-open { background-color: #e4edff; color: var(--color-primary-dark); }
+.badge-new { background-color: #e4edff; color: var(--color-primary-dark); }
 .badge-in_progress { background-color: #fdecd1; color: var(--color-warning); }
 .badge-closed { background-color: #e0f4e6; color: var(--color-success); }
 
-.badge-low { background-color: #e0f4e6; color: var(--color-success); }
-.badge-medium { background-color: #fdecd1; color: var(--color-warning); }
-.badge-high { background-color: #fbe1e1; color: var(--color-danger); }
+
+/* ---------- 10a. Приоритет заявки (цветная текстовая метка, без фона) ---------- */
+.priority-low,
+.priority-medium,
+.priority-high,
+.priority-critical {
+    font-weight: 600;
+}
+
+.priority-low { color: var(--color-success); }
+.priority-medium { color: var(--color-warning); }
+.priority-high { color: var(--color-priority-high); }
+.priority-critical {
+    color: var(--color-danger);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
 
 
 /* ---------- 11. Пагинация ---------- */
@@ -534,9 +539,14 @@ select:focus {
 
 .ticket-card-meta {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.15rem 0.75rem;
     color: var(--color-text-muted);
     font-size: 0.85rem;
+}
+
+.ticket-card-meta span {
+    white-space: nowrap;
 }
 
 
@@ -573,4 +583,43 @@ select:focus {
 
 .empty-state-text {
     color: var(--color-text-muted);
+}
+
+
+
+
+/* ---------- 16a. История изменений статуса ---------- */
+.status-history-list {
+    margin-bottom: 0;
+}
+
+.status-history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.9rem;
+}
+
+.status-history-item:last-child {
+    border-bottom: none;
+}
+
+.status-history-user {
+    font-weight: 600;
+}
+
+.status-history-change {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--color-text-muted);
+}
+
+.status-history-date {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
 }

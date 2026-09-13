@@ -20,6 +20,15 @@
                     Профиль не создан
                 {% endif %}
             </dd>
+
+            <dt>Отдел</dt>
+            <dd>
+                {% if profile.department %}
+                    {{ profile.department.name }}
+                {% else %}
+                    Не назначен
+                {% endif %}
+            </dd>
         </dl>
     </div>
 {% endblock %}

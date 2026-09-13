@@ -18,6 +18,7 @@
                     </div>
                     <div class="ticket-card-meta">
                         <span>{{ ticket.category.name }}</span>
+                        <span class="priority-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span>
                         <span>{{ ticket.created_at|date:"d.m.Y H:i" }}</span>
                     </div>
                 </a>

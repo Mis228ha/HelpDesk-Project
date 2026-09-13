@@ -7,7 +7,7 @@ from accounts.mixins import AdminRequiredMixin
 from accounts.models import Profile
 
 from .forms import CommentForm, TicketForm, TicketStatusForm
-from .models import Comment, Ticket
+from .models import Comment, StatusHistory, Ticket
 
 
 def _is_admin(user):
@@ -58,7 +58,7 @@ class TicketCreateView(LoginRequiredMixin, CreateView):
 class TicketDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     """
     Детальная карточка заявки: сама заявка, список комментариев,
-    форма добавления комментария.
+    форма добавления комментария, история изменений статуса.
 
     Доступ: автор заявки (клиент) или пользователь с ролью admin.
     """
@@ -83,6 +83,7 @@ class TicketDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context["comments"] = self.object.comments.select_related("author")
         context["comment_form"] = CommentForm()
+        context["status_history"] = self.object.status_history.select_related("changed_by")
         context["is_admin"] = _is_admin(self.request.user)
         return context
 
@@ -132,12 +133,30 @@ class TicketStatusUpdateView(AdminRequiredMixin, UpdateView):
     """
     Смена статуса заявки — доступна только администратору.
     Простая форма с select из new/in_progress/closed.
+
+    При реальном изменении статуса создаёт запись StatusHistory
+    (старый статус берётся свежим запросом из БД — на этот момент
+    self.object в памяти уже отражает НОВОЕ значение, т.к. Django
+    подставляет его в instance ещё во время form.is_valid()).
     """
 
     model = Ticket
     form_class = TicketStatusForm
     template_name = "tickets/ticket_status_form.html"
     context_object_name = "ticket"
+
+    def form_valid(self, form):
+        old_status = Ticket.objects.get(pk=self.object.pk).status
+        response = super().form_valid(form)
+        new_status = self.object.status
+        if old_status != new_status:
+            StatusHistory.objects.create(
+                ticket=self.object,
+                old_status=old_status,
+                new_status=new_status,
+                changed_by=self.request.user,
+            )
+        return response
 
     def get_success_url(self):
         return reverse("tickets:ticket_detail", kwargs={"pk": self.object.pk})

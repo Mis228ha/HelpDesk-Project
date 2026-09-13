@@ -3,13 +3,14 @@ Management-команда: python manage.py seed_db
 
 Наполняет базу тестовыми данными для разработки/демо:
 - 1 администратор (is_superuser=True, Profile.role="admin")
-- 3 клиента (Profile.role="client")
+- 4 отдела (Department)
+- 3 клиента (Profile.role="client"), распределённые по отделам
 - 3 категории заявок
 - 8-10 тестовых заявок в разных статусах, распределённых между клиентами
 - комментарии к части заявок (от админа и авторов)
 
-Идемпотентна: safe повторный запуск не создаёт дублей — пользователи/категории
-ищутся через get_or_create, заявки и комментарии — через update_or_create
+Идемпотентна: safe повторный запуск не создаёт дублей — пользователи/категории/
+отделы ищутся через get_or_create, заявки и комментарии — через update_or_create
 по естественному ключу (title / (ticket, author, text)). Пароли пользователей
 переустанавливаются при каждом запуске на указанные ниже — так гарантируется,
 что документированные логины/пароли всегда рабочие.
@@ -22,16 +23,38 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from accounts.models import Profile
-from tickets.models import Category, Comment, Ticket
+from tickets.models import Category, Comment, Department, Ticket
 
 User = get_user_model()
 
-ADMIN = {"username": "admin", "password": "admin12345", "email": "admin@helpdesk.local"}
+ADMIN = {
+    "username": "admin",
+    "password": "admin12345",
+    "email": "admin@helpdesk.local",
+    "department": "IT",
+}
+
+DEPARTMENT_NAMES = ["IT", "Бухгалтерия", "АХО", "Отдел кадров"]
 
 CLIENTS = [
-    {"username": "client1", "password": "client1pass123", "email": "client1@helpdesk.local"},
-    {"username": "client2", "password": "client2pass123", "email": "client2@helpdesk.local"},
-    {"username": "client3", "password": "client3pass123", "email": "client3@helpdesk.local"},
+    {
+        "username": "client1",
+        "password": "client1pass123",
+        "email": "client1@helpdesk.local",
+        "department": "IT",
+    },
+    {
+        "username": "client2",
+        "password": "client2pass123",
+        "email": "client2@helpdesk.local",
+        "department": "Бухгалтерия",
+    },
+    {
+        "username": "client3",
+        "password": "client3pass123",
+        "email": "client3@helpdesk.local",
+        "department": "АХО",
+    },
 ]
 
 CATEGORY_NAMES = ["Оборудование", "Программное обеспечение", "Доступы"]
@@ -42,6 +65,7 @@ TICKETS = [
         "description": "Принтер HP LaserJet не печатает, горит красная лампочка.",
         "author": "client1",
         "category": "Оборудование",
+        "priority": Ticket.Priority.LOW,
         "status": Ticket.Status.NEW,
     },
     {
@@ -49,6 +73,7 @@ TICKETS = [
         "description": "Компьютер в переговорке №2 не реагирует на клавиатуру и мышь.",
         "author": "client1",
         "category": "Оборудование",
+        "priority": Ticket.Priority.MEDIUM,
         "status": Ticket.Status.IN_PROGRESS,
     },
     {
@@ -56,6 +81,7 @@ TICKETS = [
         "description": "При установке 1С:Бухгалтерия выдаёт ошибку лицензии.",
         "author": "client1",
         "category": "Программное обеспечение",
+        "priority": Ticket.Priority.HIGH,
         "status": Ticket.Status.CLOSED,
     },
     {
@@ -63,6 +89,7 @@ TICKETS = [
         "description": "Не открывается сетевая папка \\\\fileserver\\finance, пишет «Доступ запрещён».",
         "author": "client2",
         "category": "Доступы",
+        "priority": Ticket.Priority.CRITICAL,
         "status": Ticket.Status.NEW,
     },
     {
@@ -70,6 +97,7 @@ TICKETS = [
         "description": "Нужен доступ к корпоративному VPN для удалённой работы.",
         "author": "client2",
         "category": "Доступы",
+        "priority": Ticket.Priority.MEDIUM,
         "status": Ticket.Status.IN_PROGRESS,
     },
     {
@@ -77,6 +105,7 @@ TICKETS = [
         "description": "После последнего обновления Chrome сильно тормозит и зависает.",
         "author": "client2",
         "category": "Программное обеспечение",
+        "priority": Ticket.Priority.LOW,
         "status": Ticket.Status.CLOSED,
     },
     {
@@ -84,6 +113,7 @@ TICKETS = [
         "description": "Беспроводная мышь перестала реагировать на движение.",
         "author": "client3",
         "category": "Оборудование",
+        "priority": Ticket.Priority.MEDIUM,
         "status": Ticket.Status.NEW,
     },
     {
@@ -91,6 +121,7 @@ TICKETS = [
         "description": "Для работы с макетами требуется лицензия Adobe Photoshop.",
         "author": "client3",
         "category": "Программное обеспечение",
+        "priority": Ticket.Priority.LOW,
         "status": Ticket.Status.IN_PROGRESS,
     },
     {
@@ -98,6 +129,7 @@ TICKETS = [
         "description": "Не могу войти в корпоративную почту, забыл пароль.",
         "author": "client3",
         "category": "Доступы",
+        "priority": Ticket.Priority.CRITICAL,
         "status": Ticket.Status.CLOSED,
     },
 ]
@@ -147,22 +179,34 @@ COMMENTS = [
 
 
 class Command(BaseCommand):
-    help = "Наполняет базу тестовыми данными: админ, клиенты, категории, заявки, комментарии."
+    help = "Наполняет базу тестовыми данными: админ, клиенты, отделы, категории, заявки, комментарии."
 
     @transaction.atomic
     def handle(self, *args, **options):
+        departments = {}
+        for name in DEPARTMENT_NAMES:
+            department, _ = Department.objects.get_or_create(name=name)
+            departments[name] = department
+
         users = {}
 
-        admin_user, admin_role = self._seed_user(
-            ADMIN, role=Profile.Role.ADMIN, is_staff=True, is_superuser=True
+        admin_user, admin_role, admin_dept_name = self._seed_user(
+            ADMIN,
+            role=Profile.Role.ADMIN,
+            is_staff=True,
+            is_superuser=True,
+            department=departments[ADMIN["department"]],
         )
         users["admin"] = admin_user
 
         client_rows = []
         for client_data in CLIENTS:
-            user, role = self._seed_user(client_data, role=Profile.Role.CLIENT)
+            department = departments[client_data["department"]]
+            user, role, dept_name = self._seed_user(
+                client_data, role=Profile.Role.CLIENT, department=department
+            )
             users[client_data["username"]] = user
-            client_rows.append((client_data["username"], client_data["password"], role))
+            client_rows.append((client_data["username"], client_data["password"], role, dept_name))
 
         categories = {}
         for name in CATEGORY_NAMES:
@@ -178,6 +222,7 @@ class Command(BaseCommand):
                     "description": t["description"],
                     "author": users[t["author"]],
                     "category": categories[t["category"]],
+                    "priority": t["priority"],
                     "status": t["status"],
                 },
             )
@@ -198,21 +243,25 @@ class Command(BaseCommand):
         self.stdout.write("")
         self.stdout.write(self.style.MIGRATE_HEADING("Созданные аккаунты:"))
         self.stdout.write(
-            f"  {ADMIN['username']:<10} / {ADMIN['password']:<16} — роль: {admin_role} (superuser)"
+            f"  {ADMIN['username']:<10} / {ADMIN['password']:<16} — роль: {admin_role} (superuser), отдел: {admin_dept_name}"
         )
-        for username, password, role in client_rows:
-            self.stdout.write(f"  {username:<10} / {password:<16} — роль: {role}")
+        for username, password, role, dept_name in client_rows:
+            self.stdout.write(f"  {username:<10} / {password:<16} — роль: {role}, отдел: {dept_name}")
 
         self.stdout.write("")
         self.stdout.write(self.style.MIGRATE_HEADING("Данные:"))
+        self.stdout.write(f"  Отделы: {', '.join(DEPARTMENT_NAMES)}")
         self.stdout.write(f"  Категории: {', '.join(CATEGORY_NAMES)}")
         self.stdout.write(f"  Заявок создано/обновлено: {tickets_count}")
         self.stdout.write(f"  Комментариев создано/обновлено: {comments_count}")
         self.stdout.write("")
 
     @staticmethod
-    def _seed_user(data, role, is_staff=False, is_superuser=False):
-        """Создаёт (или обновляет пароль/флаги) пользователя и его Profile. Возвращает (user, role_display)."""
+    def _seed_user(data, role, is_staff=False, is_superuser=False, department=None):
+        """
+        Создаёт (или обновляет пароль/флаги/отдел) пользователя и его Profile.
+        Возвращает (user, role_display, department_name_or_dash).
+        """
         user, created = User.objects.get_or_create(
             username=data["username"],
             defaults={"email": data["email"]},
@@ -224,9 +273,17 @@ class Command(BaseCommand):
         user.set_password(data["password"])
         user.save()
 
-        profile, _ = Profile.objects.get_or_create(user=user, defaults={"role": role})
+        profile, _ = Profile.objects.get_or_create(
+            user=user, defaults={"role": role, "department": department}
+        )
+        changed = False
         if profile.role != role:
             profile.role = role
+            changed = True
+        if profile.department_id != (department.id if department else None):
+            profile.department = department
+            changed = True
+        if changed:
             profile.save()
 
-        return user, profile.get_role_display()
+        return user, profile.get_role_display(), (department.name if department else "—")

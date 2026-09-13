@@ -24,6 +24,9 @@
 
             <dt>Обновлена</dt>
             <dd>{{ ticket.updated_at|date:"d.m.Y H:i" }}</dd>
+
+            <dt>Приоритет</dt>
+            <dd><span class="priority-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span></dd>
         </dl>
 
         <div class="ticket-description">
@@ -62,5 +65,26 @@
                 <button type="submit" class="btn btn-primary">Добавить комментарий</button>
             </div>
         </form>
+    </div>
+    <div class="card">
+        <h2>История изменений статуса</h2>
+
+        {% if status_history %}
+            <ul class="status-history-list">
+                {% for entry in status_history %}
+                    <li class="status-history-item">
+                        <span class="status-history-user">{{ entry.changed_by.username|default:"—" }}</span>
+                        <span class="status-history-change">
+                            <span class="badge badge-{{ entry.old_status }}">{{ entry.get_old_status_display }}</span>
+                            &rarr;
+                            <span class="badge badge-{{ entry.new_status }}">{{ entry.get_new_status_display }}</span>
+                        </span>
+                        <span class="status-history-date">{{ entry.changed_at|date:"d.m.Y H:i" }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="empty-state-text">Статус ещё не менялся.</p>
+        {% endif %}
     </div>
 {% endblock %}
