@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Comment, Department, StatusHistory, Ticket
+from .models import Attachment, Category, Comment, Department, StatusHistory, Ticket
 
 
 @admin.register(Department)
@@ -46,3 +46,9 @@ class StatusHistoryAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+@admin.register(Attachment)
+class AttachmentAdmin(admin.ModelAdmin):
+    list_display = ("id", "ticket", "filename", "uploaded_by", "uploaded_at")
+    list_filter = ("uploaded_at",)
+    search_fields = ("ticket__title", "file")

@@ -1,16 +1,20 @@
 from django import forms
 
-from .models import Comment, Ticket
+from .models import Attachment, Comment, Ticket
 
 
 class TicketForm(forms.ModelForm):
     """
-    Форма создания заявки: title, description, category, priority.
+    Форма создания заявки: title, description, category, priority
+    + необязательное вложение (file, не поле модели Ticket).
 
     author проставляется во view (request.user), status не входит в форму
-    и остаётся равным значению по умолчанию модели ("new").
+    и остаётся равным значению по умолчанию модели ("new"). Если файл
+    передан, TicketCreateView создаст для него отдельный Attachment.
     Рендерится в шаблоне через фильтр {{ form|crispy }}.
     """
+
+    file = forms.FileField(required=False, label="Вложение (необязательно)")
 
     class Meta:
         model = Ticket
@@ -40,3 +44,17 @@ class TicketStatusForm(forms.ModelForm):
     class Meta:
         model = Ticket
         fields = ["status"]
+
+
+class AttachmentForm(forms.ModelForm):
+    """
+    Форма добавления вложения к уже существующей заявке.
+    ticket и uploaded_by проставляются во view.
+    """
+
+    class Meta:
+        model = Attachment
+        fields = ["file"]
+        labels = {
+            "file": "Файл",
+        }

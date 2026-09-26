@@ -6,8 +6,8 @@ from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from accounts.mixins import AdminRequiredMixin
 from accounts.models import Profile
 
-from .forms import CommentForm, TicketForm, TicketStatusForm
-from .models import Comment, StatusHistory, Ticket
+from .forms import AttachmentForm, CommentForm, TicketForm, TicketStatusForm
+from .models import Attachment, Comment, StatusHistory, Ticket
 
 
 def _is_admin(user):
@@ -44,6 +44,7 @@ class TicketCreateView(LoginRequiredMixin, CreateView):
     """
     Создание заявки: доступно любому авторизованному пользователю.
     author = request.user, status по умолчанию остаётся "new" (не входит в форму).
+    Если вместе с заявкой передан файл — создаёт для него Attachment.
     """
 
     model = Ticket
@@ -52,13 +53,22 @@ class TicketCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        uploaded_file = form.cleaned_data.get("file")
+        if uploaded_file:
+            Attachment.objects.create(
+                ticket=self.object,
+                file=uploaded_file,
+                uploaded_by=self.request.user,
+            )
+        return response
 
 
 class TicketDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     """
     Детальная карточка заявки: сама заявка, список комментариев,
-    форма добавления комментария, история изменений статуса.
+    форма добавления комментария, история изменений статуса,
+    список вложений и форма добавления нового вложения.
 
     Доступ: автор заявки (клиент) или пользователь с ролью admin.
     """
@@ -84,6 +94,8 @@ class TicketDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         context["comments"] = self.object.comments.select_related("author")
         context["comment_form"] = CommentForm()
         context["status_history"] = self.object.status_history.select_related("changed_by")
+        context["attachments"] = self.object.attachments.select_related("uploaded_by")
+        context["attachment_form"] = AttachmentForm()
         context["is_admin"] = _is_admin(self.request.user)
         return context
 
@@ -125,6 +137,53 @@ class CommentCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         context["ticket"] = ticket
         context["comments"] = ticket.comments.select_related("author")
         context["comment_form"] = kwargs.get("form") or CommentForm()
+        context["status_history"] = ticket.status_history.select_related("changed_by")
+        context["attachments"] = ticket.attachments.select_related("uploaded_by")
+        context["attachment_form"] = AttachmentForm()
+        context["is_admin"] = _is_admin(self.request.user)
+        return context
+
+
+class AttachmentCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    """
+    Добавление вложения к уже существующей заявке.
+    Доступ: автор заявки (клиент, только к своей заявке) или админ (к любой).
+    При ошибке валидации заново показывает страницу заявки с ошибками формы.
+    """
+
+    model = Attachment
+    form_class = AttachmentForm
+    template_name = "tickets/ticket_detail.html"
+
+    def get_ticket(self):
+        if not hasattr(self, "_ticket"):
+            self._ticket = get_object_or_404(Ticket, pk=self.kwargs["pk"])
+        return self._ticket
+
+    def test_func(self):
+        ticket = self.get_ticket()
+        if _is_admin(self.request.user):
+            return True
+        return ticket.author_id == self.request.user.id
+
+    def form_valid(self, form):
+        form.instance.ticket = self.get_ticket()
+        form.instance.uploaded_by = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("tickets:ticket_detail", kwargs={"pk": self.kwargs["pk"]})
+
+    def get_context_data(self, **kwargs):
+        # Используется только при form_invalid — заново рендерим ticket_detail.html.
+        context = super().get_context_data(**kwargs)
+        ticket = self.get_ticket()
+        context["ticket"] = ticket
+        context["comments"] = ticket.comments.select_related("author")
+        context["comment_form"] = CommentForm()
+        context["status_history"] = ticket.status_history.select_related("changed_by")
+        context["attachments"] = ticket.attachments.select_related("uploaded_by")
+        context["attachment_form"] = kwargs.get("form") or AttachmentForm()
         context["is_admin"] = _is_admin(self.request.user)
         return context
 

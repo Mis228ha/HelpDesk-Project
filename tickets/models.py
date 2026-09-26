@@ -1,3 +1,5 @@
+import os
+
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
@@ -79,7 +81,7 @@ class Ticket(models.Model):
     def get_absolute_url(self):
         return reverse("tickets:ticket_detail", kwargs={"pk": self.pk})
 
-    
+
 class Comment(models.Model):
     """Комментарий к заявке (переписка автора и поддержки)."""
 
@@ -144,3 +146,35 @@ class StatusHistory(models.Model):
 
     def __str__(self):
         return f"{self.ticket}: {self.old_status} → {self.new_status}"
+
+
+class Attachment(models.Model):
+    """Файл, прикреплённый к заявке (создаётся вместе с заявкой или отдельно)."""
+
+    ticket = models.ForeignKey(
+        Ticket,
+        verbose_name="Заявка",
+        on_delete=models.CASCADE,
+        related_name="attachments",
+    )
+    file = models.FileField("Файл", upload_to="attachments/%Y/%m/")
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name="Загрузил",
+        on_delete=models.CASCADE,
+        related_name="attachments",
+    )
+    uploaded_at = models.DateTimeField("Загружен", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Вложение"
+        verbose_name_plural = "Вложения"
+        ordering = ["-uploaded_at"]
+
+    def __str__(self):
+        return self.filename
+
+    @property
+    def filename(self):
+        """Имя файла без пути (attachments/2026/09/x.pdf -> x.pdf) — для отображения в шаблонах."""
+        return os.path.basename(self.file.name)

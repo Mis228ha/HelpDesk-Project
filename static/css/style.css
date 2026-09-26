@@ -623,3 +623,45 @@ select:focus {
     color: var(--color-text-muted);
     font-size: 0.85rem;
 }
+
+
+
+/* ---------- 16b. Вложения ---------- */
+.attachment-list {
+    margin-bottom: 1.5rem;
+}
+
+.attachment-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.75rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.attachment-item:last-child {
+    border-bottom: none;
+}
+
+.attachment-link {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.attachment-link:hover {
+    color: var(--color-primary-dark);
+    text-decoration: underline;
+}
+
+.attachment-meta {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+}
+
+.attachment-form {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
