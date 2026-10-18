@@ -665,3 +665,29 @@ select:focus {
     padding-top: 1rem;
     border-top: 1px solid var(--color-border);
 }
+
+/* ---------- Фильтры списка заявок ---------- */
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-field {
+    flex: 1 1 160px;
+    min-width: 0;
+}
+
+.filter-field label {
+    margin-bottom: 0.25rem;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+.filter-actions {
+    display: flex;
+    gap: 0.5rem;
+}

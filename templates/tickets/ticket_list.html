@@ -8,6 +8,45 @@
         <a href="{% url 'tickets:ticket_create' %}" class="btn btn-primary">+ Новая заявка</a>
     </div>
 
+    <form method="get" action="{% url 'tickets:ticket_list' %}" class="card filter-form">
+        <div class="filter-field">
+            <label for="filter-status">Статус</label>
+            <select name="status" id="filter-status">
+                <option value="">Все</option>
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}"{% if value == selected_status %} selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-field">
+            <label for="filter-category">Категория</label>
+            <select name="category" id="filter-category">
+                <option value="">Все</option>
+                {% for category in categories %}
+                    <option value="{{ category.pk }}"{% if category.pk|stringformat:"s" == selected_category %} selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-field">
+            <label for="filter-priority">Приоритет</label>
+            <select name="priority" id="filter-priority">
+                <option value="">Все</option>
+                {% for value, label in priority_choices %}
+                    <option value="{{ value }}"{% if value == selected_priority %} selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-primary">Применить</button>
+            {% if has_filters %}
+                <a href="{% url 'tickets:ticket_list' %}" class="btn btn-secondary">Сбросить</a>
+            {% endif %}
+        </div>
+    </form>
+
     {% if tickets %}
         <div class="ticket-cards">
             {% for ticket in tickets %}
@@ -28,14 +67,19 @@
         {% if is_paginated %}
             <div class="pagination">
                 {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}">&laquo; Назад</a>
+                    <a href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">&laquo; Назад</a>
                 {% endif %}
                 <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
                 {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}">Вперёд &raquo;</a>
+                    <a href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.next_page_number }}">Вперёд &raquo;</a>
                 {% endif %}
             </div>
         {% endif %}
+    {% elif has_filters %}
+        <div class="card empty-state">
+            <p>По выбранным фильтрам заявок не найдено.</p>
+            <a href="{% url 'tickets:ticket_list' %}" class="btn btn-secondary">Сбросить фильтры</a>
+        </div>
     {% else %}
         <div class="card empty-state">
             <p>Заявок пока нет.</p>

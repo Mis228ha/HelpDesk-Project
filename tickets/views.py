@@ -7,7 +7,7 @@ from accounts.mixins import AdminRequiredMixin
 from accounts.models import Profile
 
 from .forms import AttachmentForm, CommentForm, TicketForm, TicketStatusForm
-from .models import Attachment, Comment, StatusHistory, Ticket
+from .models import Attachment, Category, Comment, StatusHistory, Ticket
 
 
 def _is_admin(user):
@@ -21,6 +21,10 @@ class TicketListView(LoginRequiredMixin, ListView):
     Список заявок в виде карточек.
     - клиент (role == "client") видит только свои заявки;
     - админ (role == "admin") видит все заявки.
+
+    Фильтрация через GET-параметры (без django-filter):
+    ?status=new|in_progress|closed&category=<id>&priority=low|medium|high|critical
+    Некорректные значения параметров просто игнорируются.
     """
 
     model = Ticket
@@ -30,13 +34,54 @@ class TicketListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         qs = Ticket.objects.select_related("author", "category")
-        if _is_admin(self.request.user):
-            return qs
-        return qs.filter(author=self.request.user)
+        if not _is_admin(self.request.user):
+            qs = qs.filter(author=self.request.user)
+
+        status = self.request.GET.get("status", "")
+        category = self.request.GET.get("category", "")
+        priority = self.request.GET.get("priority", "")
+
+        # Статус: принимаем только значения из Ticket.Status
+        if status in Ticket.Status.values:
+            qs = qs.filter(status=status)
+
+        # Категория: принимаем только число (id категории)
+        if category.isdigit():
+            qs = qs.filter(category_id=int(category))
+
+        # Приоритет: принимаем только значения из Ticket.Priority
+        if priority in Ticket.Priority.values:
+            qs = qs.filter(priority=priority)
+
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["is_admin"] = _is_admin(self.request.user)
+
+        # Варианты для select-полей
+        context["status_choices"] = Ticket.Status.choices
+        context["priority_choices"] = Ticket.Priority.choices
+        context["categories"] = Category.objects.all()
+
+        # Текущие выбранные значения (чтобы подсветить их в select)
+        context["selected_status"] = self.request.GET.get("status", "")
+        context["selected_category"] = self.request.GET.get("category", "")
+        context["selected_priority"] = self.request.GET.get("priority", "")
+
+        # Активен ли хоть один фильтр (для сообщения «ничего не найдено»)
+        context["has_filters"] = any(
+            [
+                context["selected_status"],
+                context["selected_category"],
+                context["selected_priority"],
+            ]
+        )
+
+        # Параметры фильтра без page — для ссылок пагинации
+        params = self.request.GET.copy()
+        params.pop("page", None)
+        context["querystring"] = params.urlencode()
         return context
 
 
