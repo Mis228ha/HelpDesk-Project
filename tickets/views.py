@@ -1,7 +1,14 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Avg, Count, DurationField, ExpressionWrapper, F
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.views.generic import CreateView, DetailView, ListView, UpdateView
+from django.views.generic import (
+    CreateView,
+    DetailView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
 
 from accounts.mixins import AdminRequiredMixin
 from accounts.models import Profile
@@ -264,3 +271,63 @@ class TicketStatusUpdateView(AdminRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse("tickets:ticket_detail", kwargs={"pk": self.object.pk})
+
+
+class AdminDashboardView(AdminRequiredMixin, TemplateView):
+    """
+    Дашборд администратора со сводной статистикой по заявкам.
+    Доступ только у роли admin (анонимы -> редирект на логин, остальные -> 403).
+
+    Все подсчёты выполняются на стороне БД через ORM (Count / Avg):
+    - количество заявок по статусам;
+    - количество заявок по категориям;
+    - количество заявок по приоритетам;
+    - среднее время решения закрытых заявок (updated_at - created_at), в часах.
+    """
+
+    template_name = "tickets/admin_dashboard.html"
+
+    @staticmethod
+    def _counts_by_choice(field, choices):
+        """
+        GROUP BY по полю с choices: один запрос, затем дополняем нулями
+        варианты, для которых заявок нет, — чтобы в таблице были все строки.
+        """
+        rows = Ticket.objects.values(field).annotate(total=Count("id"))
+        counts = {row[field]: row["total"] for row in rows}
+        return [
+            {"value": value, "label": label, "total": counts.get(value, 0)}
+            for value, label in choices
+        ]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["total_tickets"] = Ticket.objects.count()
+        context["status_stats"] = self._counts_by_choice("status", Ticket.Status.choices)
+        context["priority_stats"] = self._counts_by_choice(
+            "priority", Ticket.Priority.choices
+        )
+
+        # Категории: LEFT JOIN + COUNT, поэтому категории без заявок тоже попадут (с 0).
+        context["category_stats"] = Category.objects.annotate(
+            total=Count("tickets")
+        ).order_by("-total", "name")
+
+        # Среднее время решения: AVG(updated_at - created_at) по закрытым заявкам.
+        resolution = Ticket.objects.filter(status=Ticket.Status.CLOSED).aggregate(
+            avg_duration=Avg(
+                ExpressionWrapper(
+                    F("updated_at") - F("created_at"), output_field=DurationField()
+                )
+            ),
+            closed_count=Count("id"),
+        )
+        avg_duration = resolution["avg_duration"]
+        context["closed_count"] = resolution["closed_count"]
+        context["avg_resolution_hours"] = (
+            round(avg_duration.total_seconds() / 3600, 1)
+            if avg_duration is not None
+            else None
+        )
+        return context

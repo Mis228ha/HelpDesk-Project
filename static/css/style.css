@@ -691,3 +691,53 @@ select:focus {
     display: flex;
     gap: 0.5rem;
 }
+
+/* ---------- Дашборд администратора ---------- */
+.dashboard-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1rem 1.25rem;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.stat-hint {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.dashboard-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+}
+
+.table th.num,
+.table td.num {
+    text-align: right;
+    width: 6rem;
+}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Дашборд — Helpdesk{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>Дашборд</h1>
+        <a href="{% url 'tickets:ticket_list' %}" class="btn btn-secondary">К списку заявок</a>
+    </div>
+
+    <div class="dashboard-summary">
+        <div class="card stat-card">
+            <span class="stat-label">Всего заявок</span>
+            <span class="stat-value">{{ total_tickets }}</span>
+        </div>
+        <div class="card stat-card">
+            <span class="stat-label">Среднее время решения</span>
+            <span class="stat-value">
+                {% if avg_resolution_hours is not None %}{{ avg_resolution_hours }} ч{% else %}—{% endif %}
+            </span>
+            <span class="stat-hint">по закрытым заявкам: {{ closed_count }}</span>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <section>
+            <h2 class="dashboard-title">По статусам</h2>
+            <table class="table">
+                <thead>
+                    <tr><th>Статус</th><th class="num">Заявок</th></tr>
+                </thead>
+                <tbody>
+                    {% for row in status_stats %}
+                        <tr>
+                            <td><span class="badge badge-{{ row.value }}">{{ row.label }}</span></td>
+                            <td class="num">{{ row.total }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2 class="dashboard-title">По приоритетам</h2>
+            <table class="table">
+                <thead>
+                    <tr><th>Приоритет</th><th class="num">Заявок</th></tr>
+                </thead>
+                <tbody>
+                    {% for row in priority_stats %}
+                        <tr>
+                            <td><span class="priority-{{ row.value }}">{{ row.label }}</span></td>
+                            <td class="num">{{ row.total }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2 class="dashboard-title">По категориям</h2>
+            <table class="table">
+                <thead>
+                    <tr><th>Категория</th><th class="num">Заявок</th></tr>
+                </thead>
+                <tbody>
+                    {% for category in category_stats %}
+                        <tr>
+                            <td>{{ category.name }}</td>
+                            <td class="num">{{ category.total }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="2">Категорий пока нет.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </div>
+{% endblock %}

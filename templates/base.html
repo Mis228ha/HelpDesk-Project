@@ -17,6 +17,9 @@
                     {% if user.is_authenticated %}
                         <li><a href="{% url 'tickets:ticket_list' %}">Мои заявки</a></li>
                         <li><a href="{% url 'tickets:ticket_create' %}">Новая заявка</a></li>
+                        {% if user.profile.role == "admin" %}
+                            <li><a href="{% url 'tickets:admin_dashboard' %}">Дашборд</a></li>
+                        {% endif %}
                         <li><a href="{% url 'accounts:profile' %}">{{ user.username }}</a></li>
                         <li>
                             <form action="{% url 'accounts:logout' %}" method="post" class="logout-form">
