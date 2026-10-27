@@ -11,8 +11,8 @@ sqlparse==0.6.0
 # Forms: render forms without hand-coding every field's HTML
 django-crispy-forms==2.5
 
-# Settings via .env (SECRET_KEY, DEBUG, DATABASE_URL, etc.)
+# Settings via .env (SECRET_KEY, DEBUG, DB_*, etc.)
 django-environ==0.14.0
 
-# --- Needed later, when switching to PostgreSQL ---
-# psycopg2-binary==2.9.9
+# PostgreSQL driver (binary build: no need for libpq-dev / compiler)
+psycopg2-binary==2.9.*

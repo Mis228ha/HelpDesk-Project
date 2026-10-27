@@ -50,17 +50,26 @@
     {% if tickets %}
         <div class="ticket-cards">
             {% for ticket in tickets %}
-                <a href="{% url 'tickets:ticket_detail' ticket.pk %}" class="card ticket-card">
-                    <div class="ticket-card-header">
-                        <h2>{{ ticket.title }}</h2>
-                        <span class="badge badge-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
-                    </div>
-                    <div class="ticket-card-meta">
-                        <span>{{ ticket.category.name }}</span>
-                        <span class="priority-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span>
-                        <span>{{ ticket.created_at|date:"d.m.Y H:i" }}</span>
-                    </div>
-                </a>
+                <div class="card ticket-card">
+                    <a href="{% url 'tickets:ticket_detail' ticket.pk %}" class="ticket-card-link">
+                        <div class="ticket-card-header">
+                            <h2>{{ ticket.title }}</h2>
+                            <span class="badge badge-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+                        </div>
+                        <div class="ticket-card-meta">
+                            <span>{{ ticket.category.name }}</span>
+                            <span class="priority-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span>
+                            <span>{{ ticket.created_at|date:"d.m.Y H:i" }}</span>
+                        </div>
+                    </a>
+                    {% if is_admin %}
+                        <div class="ticket-card-actions">
+                            <button type="button" class="btn btn-danger btn-sm"
+                                    data-delete-url="{% url 'tickets:ticket_delete' ticket.pk %}"
+                                    data-delete-title="{{ ticket.title }}">Удалить</button>
+                        </div>
+                    {% endif %}
+                </div>
             {% endfor %}
         </div>
 

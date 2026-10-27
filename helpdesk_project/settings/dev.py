@@ -4,12 +4,13 @@
 Запуск: DJANGO_SETTINGS_MODULE=helpdesk_project.settings.dev
 (значение по умолчанию, см. manage.py)
 
-Используется SQLite — не требует установки СУБД, отлично подходит
-для разработки и тестов. PostgreSQL подключается позже в prod.py.
+База данных настраивается в base.py через .env: по умолчанию PostgreSQL
+(DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT), а при USE_SQLITE=True —
+SQLite (db.sqlite3) для быстрого запуска без сервера PostgreSQL.
 """
 
 from .base import *  # noqa: F401,F403
-from .base import BASE_DIR, env
+from .base import env
 
 DEBUG = env.bool("DJANGO_DEBUG", default=True)
 
@@ -34,15 +35,6 @@ ALLOWED_HOSTS = ["*"]
 #   DJANGO_CSRF_TRUSTED_ORIGINS=http://192.168.1.50:8000,http://192.168.1.51:8000
 # Маски вида 192.168.*.* Django не поддерживает — адреса указываются явно.
 CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS", default=[])
-
-
-# --- База данных: SQLite для разработки -------------------------------------
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
 
 
 # --- Почта: в консоль, чтобы не настраивать SMTP при разработке -------------

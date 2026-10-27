@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Служба поддержки{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="{% static 'js/confirm_delete.js' %}" defer></script>
 </head>
 <body>
     <header class="site-header">
@@ -50,6 +51,21 @@
             {% endblock %}
         </div>
     </main>
+
+    {% if user.profile.role == "admin" %}
+        {# Общее окно подтверждения удаления: его открывает static/js/confirm_delete.js #}
+        <dialog id="confirm-dialog" class="confirm-dialog" aria-labelledby="confirm-dialog-title">
+            <form method="post" class="confirm-dialog__body">
+                {% csrf_token %}
+                <h2 id="confirm-dialog-title" class="confirm-dialog__title">Подтвердите действие</h2>
+                <p class="confirm-dialog__text" data-confirm-text></p>
+                <div class="confirm-dialog__actions">
+                    <button type="button" class="btn btn-secondary" data-confirm-cancel autofocus>Отмена</button>
+                    <button type="submit" class="btn btn-danger">Да, удалить</button>
+                </div>
+            </form>
+        </dialog>
+    {% endif %}
 
     <footer class="site-footer">
         <div class="container">

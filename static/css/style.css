@@ -692,6 +692,7 @@ select:focus {
     gap: 0.5rem;
 }
 
+
 /* ---------- Дашборд администратора ---------- */
 .dashboard-summary {
     display: grid;
@@ -740,4 +741,83 @@ select:focus {
 .table td.num {
     text-align: right;
     width: 6rem;
+}
+
+
+/* ---------- Удаление заявки: кнопка и модальное окно подтверждения ---------- */
+.btn-danger {
+    background-color: var(--color-danger);
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    background-color: #b83535;
+}
+
+.btn-sm {
+    padding: 0.3rem 0.7rem;
+    font-size: 0.85rem;
+}
+
+/* Карточка в списке: ссылка растянута на всю карточку, кнопка лежит поверх неё */
+.ticket-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.ticket-card-link {
+    display: block;
+    flex: 1;
+}
+
+.ticket-card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+
+.ticket-card-actions {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.75rem;
+}
+
+.confirm-dialog {
+    margin: auto;
+    padding: 0;
+    width: min(26rem, calc(100% - 2rem));
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: 0 8px 28px rgba(20, 25, 32, 0.25);
+}
+
+.confirm-dialog::backdrop {
+    background-color: rgba(20, 25, 32, 0.55);
+}
+
+.confirm-dialog__body {
+    padding: 1.5rem;
+}
+
+.confirm-dialog__title {
+    font-size: 1.15rem;
+    margin-bottom: 0.5rem;
+}
+
+.confirm-dialog__text {
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
+}
+
+.confirm-dialog__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
 }

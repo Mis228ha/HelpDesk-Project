@@ -1,9 +1,11 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Avg, Count, DurationField, ExpressionWrapper, F
 from django.shortcuts import get_object_or_404
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.views.generic import (
     CreateView,
+    DeleteView,
     DetailView,
     ListView,
     TemplateView,
@@ -271,6 +273,27 @@ class TicketStatusUpdateView(AdminRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse("tickets:ticket_detail", kwargs={"pk": self.object.pk})
+
+
+class TicketDeleteView(AdminRequiredMixin, DeleteView):
+    """
+    Удаление заявки — только администратор и только методом POST
+    (подтверждение происходит в модальном окне на странице, см. confirm_delete.js).
+
+    - GET -> 405 Method Not Allowed (http_method_names = ["post"]);
+    - аноним -> редирект на логин, клиент -> 403 (AdminRequiredMixin);
+    - связанные Comment / StatusHistory / Attachment удаляются каскадно
+      (on_delete=CASCADE), файлы вложений — сигналом post_delete (tickets/signals.py).
+    """
+
+    model = Ticket
+    http_method_names = ["post"]
+    success_url = reverse_lazy("tickets:ticket_list")
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, "Заявка удалена")
+        return response
 
 
 class AdminDashboardView(AdminRequiredMixin, TemplateView):

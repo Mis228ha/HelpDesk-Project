@@ -91,6 +91,36 @@ WSGI_APPLICATION = "helpdesk_project.wsgi.application"
 ASGI_APPLICATION = "helpdesk_project.asgi.application"
 
 
+# --- База данных ------------------------------------------------------------
+# По умолчанию — PostgreSQL; параметры подключения берутся из .env:
+#   DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT
+# Для быстрого локального запуска без сервера PostgreSQL задайте в .env
+#   USE_SQLITE=True
+# — тогда будет использован файл db.sqlite3 в корне проекта.
+USE_SQLITE = env.bool("USE_SQLITE", default=False)
+
+if USE_SQLITE:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            # Без значения по умолчанию: если переменной нет в .env,
+            # Django сразу скажет, какую именно нужно задать.
+            "NAME": env("DB_NAME"),
+            "USER": env("DB_USER"),
+            "PASSWORD": env("DB_PASSWORD"),
+            "HOST": env("DB_HOST", default="localhost"),
+            "PORT": env("DB_PORT", default="5432"),
+        }
+    }
+
+
 # --- Валидация паролей ------------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
     {
